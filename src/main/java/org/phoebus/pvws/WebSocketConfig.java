@@ -33,6 +33,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.annotation.PostConstruct;
+
 @SuppressWarnings("unused")
 @Configuration
 @EnableWebSocketMessageBroker
@@ -49,5 +51,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/pvws") // this matches what SockJS connects to
                 .setAllowedOriginPatterns("*")
                 .withSockJS(); // critical to support fallback transports
+            System.out.println("Registering /pvws endpoint with SockJS");
+
     }
+    @PostConstruct
+public void init() {
+    System.out.println("✅ WebSocketConfig loaded and running");
 }
+
+}
+
+
