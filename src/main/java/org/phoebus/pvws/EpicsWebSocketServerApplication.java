@@ -27,15 +27,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.ApplicationContext;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "org.phoebus.pvws")
 public class EpicsWebSocketServerApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         ApplicationContext applicationContext = SpringApplication.run(EpicsWebSocketServerApplication.class, args);
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+       /*  Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             List<WebSocket> sockets = (List<WebSocket>) applicationContext.getBean("sockets");
             sockets.forEach(s -> {
                 System.out.println(s.getId());
@@ -46,7 +48,7 @@ public class EpicsWebSocketServerApplication extends SpringBootServletInitialize
                     System.out.println("Unreleased PV " + ref.getEntry().getName());
                     PVPool.releasePV(ref.getEntry());
                 }
-        }));
+        })); */
     }
 
     @Override

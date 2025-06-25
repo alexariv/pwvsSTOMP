@@ -211,13 +211,13 @@ jQuery("#pool_url").html(window.location.href + "pool");
 jQuery("form").submit(e => false);
 
 // Create PV Web Socket new with stomp
-const socket = new SockJS('/pvws');
+const socket = new SockJS('/pvws/pvws');
 const stompClient = Stomp.over(socket);
 
 stompClient.connect({}, function (frame) {
     console.log('Connected: ' + frame);
     // Subscribe to a PV topic
-    stompClient.subscribe('/topic/pvupdates', function (message) {
+    stompClient.subscribe('/topic/pvs', function (message) {
         const body = JSON.parse(message.body);
         jQuery("#messages").val(JSON.stringify(body, null, 2));
     });

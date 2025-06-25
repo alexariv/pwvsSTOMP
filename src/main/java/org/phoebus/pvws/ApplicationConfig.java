@@ -22,17 +22,12 @@ package org.phoebus.pvws;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.phoebus.pvws.ws.Vtype2Json;
-import org.phoebus.pvws.ws.WebSocket;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-@SuppressWarnings("unused")
 @Configuration
 public class ApplicationConfig {
 
@@ -49,20 +44,16 @@ public class ApplicationConfig {
 
     @Bean
     @Scope("singleton")
-    public Vtype2Json vtype2Json() {
-        return new Vtype2Json();
-    }
-
-    @Bean(name = "sockets")
-    @Scope("singleton")
-    public List<WebSocket> getSockets() {
-        return new CopyOnWriteArrayList<>();
-    }
-
-    @Bean
-    @Scope("singleton")
     public Instant startTime() {
         return startTime;
     }
 
+    // Optional: Only keep if you use this as an @Autowired dependency
+    /*
+    @Bean
+    @Scope("singleton")
+    public Vtype2Json vtype2Json() {
+        return new Vtype2Json();
+    }
+    */
 }

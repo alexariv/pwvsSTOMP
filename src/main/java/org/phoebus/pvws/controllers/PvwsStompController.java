@@ -39,6 +39,8 @@ import org.springframework.web.util.HtmlUtils;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,8 +56,13 @@ import java.util.logging.Logger;
  * ******************************************************************************
  * </p>
  */
-@Controller
+@RestController
 public class PvwsStompController {
+
+    private static final Logger logger = Logger.getLogger(PvwsStompController.class.getName());
+
+    // Track active PVs per client (if needed, expand this into per-session storage)
+    private final Map<String, PV> activePvs = new ConcurrentHashMap<>();
 
     @MessageMapping("/echo")
     @SendTo("/topic/echo")
@@ -67,14 +74,33 @@ public class PvwsStompController {
     @MessageMapping("/write")
     @SendTo("/topic/write")
     public ApplicationClientWriteMessage handleWrite(ApplicationClientWriteMessage message) {
-        // You would add PVPool/EPICS write logic here
+        try {
+            PV pv = activePvs.get(message.getPv());
+            if (pv == null) {
+                pv = PVPool.getPV(message.getPv());
+                activePvs.put(message.getPv(), pv);
+            }
+            pv.write(message.getValue());
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, "Failed to write to PV: " + message.getPv(), ex);
+        }
         return message;
     }
+
 
     @MessageMapping("/subscribe")
     @SendTo("/topic/pvs")
     public ApplicationClientPvsMessage handleSubscribe(SubscribeMessage msg) {
-        // For example, resolve PVs here and return
-        return new ApplicationClientPvsMessage("list", msg.getPvs());
-    }
+        List<String> subscribed = new ArrayList<>();
+        for (String name : msg.getPvs()) {
+            try {
+                PV pv = PVPool.getPV(name);
+                activePvs.put(name, pv);
+                subscribed.add(name);
+            } catch (Exception ex) {
+                logger.log(Level.WARNING, "Failed to subscribe to PV: " + name, ex);
+            }
+        }
+        return new ApplicationClientPvsMessage("list", subscribed);
+   }
 }

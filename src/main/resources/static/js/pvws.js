@@ -58,7 +58,7 @@ class PVWS
         console.log("Connected to STOMP " + this.url);
         this.connect_handler(true);
 
-        this.stompClient.subscribe('/topic/update', message => this.handleMessage(message.body));
+        this.stompClient.subscribe('/topic/pvs', message => this.handleMessage(message.body));
         this.stompClient.subscribe('/topic/error', message => this.handleMessage(message.body));
         // You can add more topic subscriptions here (e.g. /topic/pvs, /topic/write)
 
