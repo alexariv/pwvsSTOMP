@@ -44,6 +44,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/*test add 
+import org.phoebus.pv.PVListener;
+import org.phoebus.pv.ValueUpdate; */
+
 /**
  * This class replaces several servlets from the original pvws implementation,
  * which are published under the following copyright:
@@ -88,7 +92,7 @@ public class PvwsStompController {
     }
 
 
-    @MessageMapping("/subscribe")
+   /*comment out for now so i could test   @MessageMapping("/subscribe")
     @SendTo("/topic/pvs")
     public ApplicationClientPvsMessage handleSubscribe(SubscribeMessage msg) {
         List<String> subscribed = new ArrayList<>();
@@ -102,5 +106,113 @@ public class PvwsStompController {
             }
         }
         return new ApplicationClientPvsMessage("list", subscribed);
-   }
+   } */
+    /* test 1
+    @MessageMapping("/subscribe")
+public void handleSubscribe(SubscribeMessage msg) {
+    for (String name : msg.getPvs()) {
+        try {
+            PV pv = PVPool.getPV(name);
+            activePvs.put(name, pv);
+
+            pv.addListener(value -> {
+                if (value instanceof VType) {
+                    VType v = (VType) value;
+                    logger.info("Update from PV '" + name + "': " + v.toString());
+                    // Optionally send update to client using messaging
+                } else {
+                    logger.warning("Received non-VType value from PV '" + name + "'");
+                }
+            });
+
+            pv.start();
+
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, "Failed to subscribe to PV: " + name, ex);
+        }
+    }
+} */
+/*test 2
+@MessageMapping("/subscribe")
+public void handleSubscribe(SubscribeMessage msg) {
+    for (String name : msg.getPvs()) {
+        try {
+            PV pv = PVPool.getPV(name);
+            activePvs.put(name, pv);
+
+            pv.addListener(new PVListener() {
+                @Override
+                public void valueChanged(PV pv, ValueUpdate update) {
+                    logger.info("Value changed for PV '" + name + "': " + update.getValue());
+                }
+            });
+
+            pv.start();  // This should be valid — PVPool returns a usable instance
+
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, "Failed to subscribe to PV: " + name, ex);
+        }
+    }
+}*/
+/*test 3
+@MessageMapping("/subscribe")
+public void handleSubscribe(SubscribeMessage msg) {
+    for (String name : msg.getPvs()) {
+        try {
+            PV pv = PVPool.getPV(name);
+            activePvs.put(name, pv);
+
+            // Use the simpler two-arg listener if PVListener is unavailable
+            pv.addListener((pvname, value) -> {
+                logger.info("Update from '" + pvname + "': " + value);
+            });
+
+            // Only call start if it exists; otherwise skip it for now
+            // If your PV class doesn't have start(), this line can be removed
+            // or replace with reflection if needed.
+
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, "Failed to subscribe to PV: " + name, ex);
+        }
+    }
+} */
+/*test 4
+@MessageMapping("/subscribe")
+public void handleSubscribe(SubscribeMessage msg) {
+    for (String name : msg.getPvs()) {
+        try {
+            PV pv = PVPool.getPV(name);
+            activePvs.put(name, pv);
+
+            pv.addOnValueChanged(value -> {
+                logger.info("Update from '" + name + "': " + value);
+                // Optionally: broadcast this value to STOMP clients here
+            });
+
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, "Failed to subscribe to PV: " + name, ex);
+        }
+    }
+}*/
+//test 5
+@MessageMapping("/subscribe")
+public void handleSubscribe(SubscribeMessage msg) {
+    for (String name : msg.getPvs()) {
+        try {
+            PV pv = PVPool.getPV(name);
+            activePvs.put(name, pv);
+
+            Object value = pv.read();
+            logger.info("Read initial value from '" + name + "': " + value);
+
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, "Failed to subscribe to PV: " + name, ex);
+        }
+    }
+}
+
+
+
+
+
 }

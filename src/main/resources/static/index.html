@@ -213,9 +213,11 @@ jQuery("form").submit(e => false);
 // Create PV Web Socket new with stomp
 const socket = new SockJS('/pvws/pvws');
 const stompClient = Stomp.over(socket);
+let server = window.location.origin;
 
 stompClient.connect({}, function (frame) {
     console.log('Connected: ' + frame);
+    console.log("Connected to server: " + socket._transport.url);  // shows actual URL
     // Subscribe to a PV topic
     stompClient.subscribe('/topic/pvs', function (message) {
         const body = JSON.parse(message.body);
