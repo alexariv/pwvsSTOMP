@@ -58,7 +58,9 @@ public class PvwsStompController {
                 activePvs.put(key, pv);
 
                 // 1) send initial value
+                try {
                 Object initial = pv.read();
+                if (initial != null) {
                 broker.convertAndSend(
                         "/topic/pvs",
                         Map.of(
@@ -68,6 +70,11 @@ public class PvwsStompController {
                                 "ts",    Instant.now().toString()
                         )
                 );
+                 }
+                    } catch (Exception readEx) {
+                        logger.warning("Initial read failed for PV " + name + ": " + readEx.getMessage());
+                        
+                    }
 
                 // 2) register streaming listener
                 pv.onValueEvent().subscribe(vtype -> {
